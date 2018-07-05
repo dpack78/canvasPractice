@@ -281,7 +281,7 @@ window.addEventListener('mouseup',function(event){
 	mouseDown = false;
 }); 
 
-var MyCircleGroup = new Circles(1000,10);
+var MyCircleGroup = new Circles(500,10);
 //var MyCircleGroup = new Circles(1,10);
 
 animateLoop();
