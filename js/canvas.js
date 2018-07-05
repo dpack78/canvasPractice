@@ -1,16 +1,24 @@
 var canvas = document.querySelector('#canvasPractice');
 canvas.width = window.innerWidth -1;
 canvas.height = window.innerHeight -4;
-growRate = .3;
+growRate = .1;
 maxRadius = 15;
 mouseDown = false;
 
-var a_color = [
+var a_colorFull = [
 	'rgba(0,223,255,.8)',
 	'rgba(0,159,255,.8)',
 	'rgba(0,120,255,.8)',
 	'rgba(0,56,255,.8)',
 	'rgba(0,13,107,.8)',
+];
+
+var a_color = [
+	'0,223,255',
+	'0,159,255',
+	'0,120,255',
+	'0,56,255',
+	'0,13,107',
 ];
 
 var c = canvas.getContext('2d');
@@ -26,20 +34,22 @@ function Circle(x, y, dx, dy, radius){
 	this.maxY = canvas.height - radius;
 	this.minY = radius;
 	this.minX = radius;
+	this.curOpacity = .8;
 //	this.r = Math.round(Math.random()* 255);
 //	this.g = Math.round(Math.random()* 255);
 //	this.b = Math.round(Math.random()* 255);
 //	this.color =  'rgba('+this.r+','+this.g+','+this.b+',.8)';
 	var index = Math.round(Math.random()*(a_color.length - 1));
 	this.color = a_color[index];
+	this.colorFull = 'rgba('+this.color+','+this.curOpacity+')';
 //	console.log(this.color);
 //	console.log(index);
 	
 	this.draw = function(){
 		c.beginPath();
 		c.arc(this.x,this.y,this.radius,0,Math.PI*2,false);
-		c.strokeStyle = this.color;
-		c.fillStyle = this.color;
+		c.strokeStyle = this.colorFull;
+		c.fillStyle = this.colorFull;
 		c.fill();
 		c.stroke();
 	}
@@ -52,12 +62,25 @@ function Circle(x, y, dx, dy, radius){
 		if(this.y >= this.maxY || this.y <= this.minY){
 			this.dy *= -1;
 		}
-//		this.dy += 1;
-		
 		this.x += this.dx;
 		this.y += this.dy;
 		this.dy*= .99;
 		this.dx*= .99;
+		
+		var speed = Math.sqrt(this.dx*this.dx + this.dy*this.dy);
+		if(speed == 0){
+			speed = .0000001;
+		}
+		var nextOpacity = 1/speed;
+		if(nextOpacity < .1){
+			nextOpacity = .1;
+		}
+		
+		if(nextOpacity > .9){
+			nextOpacity = .9;
+		}
+		this.curOpacity = nextOpacity;
+		this.colorFull = 'rgba('+this.color+','+this.curOpacity+')';
 		this.draw();
 	}
 	
