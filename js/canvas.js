@@ -4,6 +4,8 @@ canvas.height = window.innerHeight -4;
 growRate = .1;
 maxRadius = 15;
 mouseDown = false;
+useHitWallAnimation = true;
+//useHitWallAnimation = false;
 
 var a_colorFull = [
 	'rgba(0,223,255,.8)',
@@ -35,6 +37,9 @@ function Circle(x, y, dx, dy, radius){
 	this.minY = radius;
 	this.minX = radius;
 	this.curOpacity = .8;
+	this.hitWallOpacity = 1;
+	this.runningHitWallAnimation = false;
+	this.hitWallRadiusDiff = 0;
 //	this.r = Math.round(Math.random()* 255);
 //	this.g = Math.round(Math.random()* 255);
 //	this.b = Math.round(Math.random()* 255);
@@ -52,15 +57,30 @@ function Circle(x, y, dx, dy, radius){
 		c.fillStyle = this.colorFull;
 		c.fill();
 		c.stroke();
+		if(this.runningHitWallAnimation){
+			c.beginPath();
+			c.arc(this.x,this.y,(this.hitWallRadiusDiff + this.radius),0,Math.PI*2,false);
+			c.strokeStyle = 'rgba('+this.color+','+this.hitWallOpacity+')';
+			c.stroke();
+			this.hitWallRadiusDiff += .6;
+			this.hitWallOpacity -= .03;
+			if (this.hitWallOpacity < 0){
+				this.hitWallOpacity = 1;
+				this.hitWallRadiusDiff = 0;
+				this.runningHitWallAnimation = false;
+			}
+		}
 	}
 
 	this.update = function(){
 		if(this.x >= this.maxX || this.x <= this.minY){
 			this.dx *= -1;
+			this.hitWall();
 		}
 
 		if(this.y >= this.maxY || this.y <= this.minY){
 			this.dy *= -1;
+			this.hitWall();
 		}
 		this.x += this.dx;
 		this.y += this.dy;
@@ -107,6 +127,15 @@ function Circle(x, y, dx, dy, radius){
 		this.maxY = canvas.height - radius;
 		this.minY = radius;
 		this.minX = radius;
+	}
+	
+	this.hitWall = function(){
+		if(!useHitWallAnimation){
+			return;
+		}
+		this.runningHitWallAnimation = true;
+		this.hitWallOpacity = 1;
+		this.hitWallRadiusDiff = 0;
 	}
 }
 
@@ -253,6 +282,7 @@ window.addEventListener('mouseup',function(event){
 }); 
 
 var MyCircleGroup = new Circles(1000,10);
+//var MyCircleGroup = new Circles(1,10);
 
 animateLoop();
 function animateLoop(highResTimestamp) {
